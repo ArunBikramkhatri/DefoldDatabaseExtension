@@ -1,41 +1,39 @@
 package com.rummy.databaseExtension;
 
-import androidx.annotation.NonNull;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-
-@Entity
 public class User {
-
-    @PrimaryKey
-    @ColumnInfo(name = "roll")
-    private int roll;
-
-    @ColumnInfo(name = "user_name")
-    private String name;
+    int _id;
+    String _name;
 
     public User() {
     }
 
-    public User(String name, int roll) {
-        this.name = name;
-        this.roll = roll;
+    public User(int id, String name) {
+        this._id = id;
+        this._name = name;
+    }
+
+    public int getID() {
+        return this._id;
+    }
+
+    public void setID(int id) {
+        this._id = id;
     }
 
     public String getName() {
-        return name;
+        return this._name;
+    }
+
+    @Override
+    public String toString() {
+        return "StudentList{" +
+                "_id=" + _id +
+                ", _name='" + _name + '\'' +
+                '}';
     }
 
     public void setName(String name) {
-        this.name = name;
+        this._name = name;
     }
 
-    public int getRoll() {
-        return roll;
-    }
-
-    public void setRoll(int roll) {
-        this.roll = roll;
-    }
 }

@@ -1,45 +1,37 @@
 package com.rummy.databaseExtension;
 
 import java.util.List;
+
+import com.rummy.databaseExtension.database.SqliteTest;
+
 import android.app.Activity;
 import android.util.Log;
-import androidx.room.Room;
-import com.rummy.databaseExtension.database.RummyDatabase;
-import com.rummy.databaseExtension.database.UserDao;
 
 public class DatabaseExtension {
 
     private static final String TAG = "DatabaseExtension";
-    private Activity activity;
 
-    private RummyDatabase db;
-    private UserDao userDao;
+    private SqliteTest db;
 
     public DatabaseExtension(Activity activity) {
         this.activity = activity;
         Log.d(TAG, "DatabaseExtension: constructor called");
-        setDatabase();
+        db = new SqliteTest(activity);
+
     }
 
-    public void setDatabase() {
+    public void insertData(String data, int id) {
         try {
-            db = Room.databaseBuilder(activity.getApplicationContext(),
-                    RummyDatabase.class, "testDb").build();
-            userDao = db.getUserDao();
-        } catch (Exception e) {
-            Log.e(TAG, e.getLocalizedMessage(), e);
-            e.printStackTrace();
-        }
-    }
-
-    public void insertData(String data, int roll) {
-        try {
-            if (userDao == null) {
-                setDatabase();
+            if (db  == null) {
+                Log.d(TAG , "db is null")
             }
             Log.d(TAG, "insert data " + data);
-            User user = new User(data, roll);
-            userDao.insertUser(user);
+            User user = new User(id , data);
+            db.addUser(user);
+
+            System.out.println("\n\n\\n");
+            db.getUserList();
+
         } catch (Exception e) {
             Log.e(TAG, e.getLocalizedMessage(), e);
             e.printStackTrace();
@@ -48,11 +40,7 @@ public class DatabaseExtension {
 
     public void getAllUsers() {
         try {
-            if (userDao == null) {
-                setDatabase();
-            }
-            List<User> users = userDao.getAllUsers();
-            Log.d(TAG, users.toString());
+
         } catch (Exception e) {
             Log.e(TAG, e.getLocalizedMessage(), e);
             e.printStackTrace();
