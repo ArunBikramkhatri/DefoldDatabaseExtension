@@ -12,6 +12,7 @@ public class DatabaseExtension {
     private static final String TAG = "DatabaseExtension";
 
     private SqliteTest db;
+    private Activity activity;
 
     public DatabaseExtension(Activity activity) {
         this.activity = activity;
@@ -22,11 +23,11 @@ public class DatabaseExtension {
 
     public void insertData(String data, int id) {
         try {
-            if (db  == null) {
-                Log.d(TAG , "db is null")
+            if (db == null) {
+                Log.d(TAG, "db is null");
             }
             Log.d(TAG, "insert data " + data);
-            User user = new User(id , data);
+            User user = new User(id, data);
             db.addUser(user);
 
             System.out.println("\n\n\\n");
