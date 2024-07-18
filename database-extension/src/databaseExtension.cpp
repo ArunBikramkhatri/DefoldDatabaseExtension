@@ -22,38 +22,40 @@ struct DatabaseExtenstion
 static DatabaseExtenstion  g_database_extenison;
 
 
-static void callVoidMethodCharInt(jobject instance , jmethodID method , char* cstr , int i){
+
+static void CallVoidMethod(jobject instance, jmethodID method)
+{
     dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
-    jstring str = env->NewStringUTF(str);
+
+    env->CallVoidMethod(instance, method);
+}
 
 
+static void callVoidMethodCharInt(jobject instance , jmethodID method , const char* cstr , int ci){
+    dmLogInfo("working 3")
+    dmAndroid::ThreadAttacher threadAttacher;
+    JNIEnv* env = threadAttacher.GetEnv();
+    jstring str = env->NewStringUTF(cstr);
+
+    env->CallVoidMethod(instance, method, str, ci);
+    
     env->DeleteLocalRef(str);
 }
 
 
-static jclass GetClass(JNIEnv* env, const char* classname)
-{
-    jclass activity_class = env->FindClass("android/app/NativeActivity");
-    jmethodID get_class_loader = env->GetMethodID(activity_class,"getClassLoader", "()Ljava/lang/ClassLoader;");
-    jobject cls = env->CallObjectMethod(dmGraphics::GetNativeAndroidActivity(), get_class_loader);
-    jclass class_loader = env->FindClass("java/lang/ClassLoader");
-    jmethodID find_class = env->GetMethodID(class_loader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-
-    jstring str_class_name = env->NewStringUTF(classname);
-    jclass outcls = (jclass)env->CallObjectMethod(cls, find_class, str_class_name);
-    env->DeleteLocalRef(str_class_name);
-    return outcls;
-}
-
-}
-
-
-static int Databse_InsertUser(lua_State* L){
+static int Database_InsertUser(lua_State* L){
+    dmLogInfo("working 0")
     DM_LUA_STACK_CHECK(L, 0);
+    if (lua_gettop(L) != 2) {
+        luaL_error(L, "Expected 2 arguments");
+       
+    }
+    dmLogInfo("working 1")
     const char* name = luaL_checkstring(L, 1);
     int roll = luaL_checknumber(L, 2);
-
+    // dmLogInfo("working 2")
+    // int roll = 10 ;
     callVoidMethodCharInt(g_database_extenison.m_DatabaseJNI , g_database_extenison.m_insertData , name , roll);
     return 0;
 }
@@ -63,34 +65,33 @@ static int Databse_InsertUser(lua_State* L){
 // Functions exposed to Lua
 static const luaL_reg Database_methods[] =
 {
-    {"insert_user" , Database_InsertUser },
+    {"insert_user" , Database_InsertUser},
     {0, 0}
 };
 
 static void LuaInit(lua_State* L)
-{
-    iDM_LUA_STACK_CHECK(L, 0);
+{   
+    DM_LUA_STACK_CHECK(L, 0);
     luaL_register(L, MODULE_NAME, Database_methods);
+    lua_pop(L, 1);
 }
 
 
 
 static void InitJNIMethods(JNIEnv* env , jclass cls){
-   g_database_extenison.m_insertData = env->GetMethodID(cls , "insertData" , "(Ljava/lang/String;I)V") 
-   g_database_extenison.m_getAllUsers = env->GetMethodID(cls , "getAllUsers" , "()V")
+   g_database_extenison.m_insertData = env->GetMethodID(cls , "insertData" , "(Ljava/lang/String;I)V");
+   g_database_extenison.m_getAllUsers = env->GetMethodID(cls , "getAllUsers" , "()V");
 }
 
 
-static void InitializeJNI(){
-    dmAndroid::ThreadAttacher threadAttacher ;
+void InitializeJNI() {
+    dmAndroid::ThreadAttacher threadAttacher;
     JNIEnv* env = threadAttacher.GetEnv();
-    jclass cls = dmAndroid::loadClass(env, "com.rummy.databaseExtension");
-    InitJNIMethods(env , cls);
-
-    jmethodID jni_constructor = env->GetMethodID(cls , "<init>" , "(Landroid/app/activity;)V");
-
-    g_database_extenison.m_DatabaseJNI = env->NewGlobalRef(env->NewObject(cls , jni_constructor , threadAttacher.GetActivity()));
-
+    jclass cls = dmAndroid::LoadClass(env, "com.rummy.databaseExtension.DatabaseExtension");
+    InitJNIMethods(env, cls);
+    jobject native_activity = dmGraphics::GetNativeAndroidActivity();
+    jmethodID jni_constructor = env->GetMethodID(cls, "<init>", "(Landroid/app/Activity;)V");
+    g_database_extenison.m_DatabaseJNI = env->NewGlobalRef(env->NewObject(cls, jni_constructor, native_activity));
 }
 
 static dmExtension::Result AppInitializeMyExtension(dmExtension::AppParams* params)
@@ -103,6 +104,7 @@ static dmExtension::Result InitializeMyExtension(dmExtension::Params* params)
 {
     // Init Lua
     LuaInit(params->m_L);
+    InitializeJNI();
     dmLogInfo("Registered %s Extension", MODULE_NAME);
     return dmExtension::RESULT_OK;
 }
@@ -155,8 +157,6 @@ static dmExtension::Result AppInitializeMyExtension(dmExtension::AppParams* para
 
 static dmExtension::Result InitializeMyExtension(dmExtension::Params* params)
 {
-    // Init Lua
-    // LuaInit(params->m_L);
     dmLogWarning("Registered %s (null) Extension\n", MODULE_NAME);
     return dmExtension::RESULT_OK;
 }

@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
 import java.util.List;
+import com.rummy.databaseExtension.User;
 
 @Dao
 public interface UserDao {
@@ -13,6 +14,6 @@ public interface UserDao {
     @Query("select * from User")
     List<User> getAllUsers();
 
-    @Query
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertUser(User user);
 }

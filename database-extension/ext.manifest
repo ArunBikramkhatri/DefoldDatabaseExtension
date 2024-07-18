@@ -4,4 +4,4 @@ name: "databaseExtension"
 platforms:
     android:
         context:
-            aaptExtraPackages: ["androidx.work", "androidx.startup"]
+            aaptExtraPackages: ["androidx.work", "androidx.startup" ,"androidx.room"]
